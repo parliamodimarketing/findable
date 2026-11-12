@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Findable Check</title>
+<style>
+:root{--ink:#161616;--green:#194D36;--coral:#E8543A;--cream:#F6F1E8;--paper:#FBF8F1;--grey:#6F685D;--line:#D9D1C3;--tg:#E2EAE1;--tc:#F8E1D9;--amber:#B7791F;--ta:#F6EBD5}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.5}
+header{max-width:1180px;margin:0 auto;padding:28px 20px 18px;border-bottom:1px solid var(--ink);position:relative}
+.kicker{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--coral)}
+h1{font-family:Georgia,serif;font-weight:400;font-size:clamp(32px,5.5vw,54px);line-height:1.05;margin:8px 0 6px}
+h1 b{font-family:"Arial Black",Arial,sans-serif;font-weight:900;color:var(--coral);display:block;font-size:.82em;letter-spacing:-.01em}
+.lead{max-width:62ch;margin:0;color:var(--grey)}
+.langs{position:absolute;top:26px;right:20px;display:flex;gap:4px}
+.langs button{font:700 11px/1 Arial;letter-spacing:.12em;border:1px solid var(--line);background:var(--paper);color:var(--grey);padding:7px 10px;cursor:pointer}
+.langs button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+@media(max-width:640px){.langs{position:static;margin-bottom:12px}}
+main{max-width:1180px;margin:0 auto;padding:22px 20px 40px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.card{background:var(--paper);border:1px solid var(--line);padding:18px 18px 16px;margin-bottom:14px;box-shadow:0 3px 10px rgba(0,0,0,.06)}
+label{display:block;font-weight:700;font-size:14px;margin-bottom:2px}
+.hint{font-family:Georgia,serif;font-style:italic;color:var(--grey);font-size:14px;margin:0 0 8px}
+input,textarea{width:100%;font:16px/1.45 Arial,sans-serif;padding:10px 11px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+input:focus,textarea:focus{outline:2px solid var(--green);outline-offset:0}
+textarea{min-height:92px;resize:vertical}
+.count{font-size:12px;color:var(--grey);text-align:right;margin-top:3px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+button.btn{font:700 13px/1 Arial;letter-spacing:.06em;padding:11px 14px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink)}
+button.btn:focus-visible{outline:2px solid var(--coral);outline-offset:2px}
+.scores{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.score{padding:16px;border:1px solid var(--line);background:var(--paper)}
+.score .lab{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--grey)}
+.score .num{font-family:"Arial Black",Arial,sans-serif;font-size:42px;line-height:1.1}
+.score .verdict{font-family:Georgia,serif;font-style:italic;font-size:15px}
+.score.good .num{color:var(--green)} .score.mid .num{color:var(--amber)} .score.low .num{color:var(--coral)}
+h2{font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin:18px 0 8px;color:var(--green)}
+h2.ai{color:var(--coral)}
+ul.checks{list-style:none;margin:0;padding:0}
+ul.checks li{display:grid;grid-template-columns:30px 1fr;gap:8px;padding:10px 12px;margin-bottom:8px;border-left:4px solid var(--line);background:var(--paper)}
+li.pass{border-color:var(--green)} li.warn{border-color:var(--amber)} li.fail{border-color:var(--coral)}
+.badge{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:13px;color:#fff}
+li.pass .badge{background:var(--green)} li.warn .badge{background:var(--amber)} li.fail .badge{background:var(--coral)}
+.ctitle{font-weight:700}
+.cwhy{font-size:14px;color:var(--grey)}
+.ctip{font-family:Georgia,serif;font-style:italic;font-size:14.5px;margin-top:3px}
+.tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.1em;padding:1px 6px;margin-left:6px;vertical-align:2px;border:1px solid var(--line);color:var(--grey)}
+.tag.g{border-color:var(--green);color:var(--green)}.tag.a{border-color:var(--coral);color:var(--coral)}
+h2.part{color:var(--ink)}
+pre.prop{white-space:pre-wrap;font:14px/1.5 Georgia,serif;background:#fff;border:1px solid var(--line);padding:12px 14px;margin:6px 0 8px;max-height:420px;overflow:auto}
+.empty{font-family:Georgia,serif;font-style:italic;color:var(--grey);padding:24px 4px}
+.note{font-size:13px;color:var(--grey);border-top:1px solid var(--line);margin-top:16px;padding-top:10px}
+mark{background:var(--ta);padding:0 2px}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.chip{font-size:12px;padding:2px 7px;border:1px solid var(--line);background:#fff}
+.chip.hit{border-color:var(--green);background:var(--tg)}
+.chip.miss{border-color:var(--coral);background:var(--tc)}
+footer{max-width:1180px;margin:0 auto;padding:0 20px 30px;font-size:12px;color:var(--grey)}
+</style>
+</head>
+<body>
+<header>
+  <div class="langs" role="group" aria-label="Language">
+    <button type="button" data-lang="en" aria-pressed="true">EN</button>
+    <button type="button" data-lang="es" aria-pressed="false">ES</button>
+  </div>
+  <div class="kicker" data-i18n="kicker"></div>
+  <h1><span data-i18n="h1a"></span><b data-i18n="h1b"></b></h1>
+  <p class="lead" data-i18n="lead"></p>
+</header>
+<main>
+  <section aria-label="Your page">
+    <div class="card"><label for="q" data-i18n="qL"></label><p class="hint" data-i18n="qH"></p><input id="q" type="text" autocomplete="off"></div>
+    <div class="card"><label for="brand" data-i18n="bL"></label><p class="hint" data-i18n="bH"></p><input id="brand" type="text" autocomplete="off"></div>
+    <div class="card"><label for="title" data-i18n="tL"></label><p class="hint" data-i18n="tH"></p><input id="title" type="text" autocomplete="off"><div class="count" id="tCount"></div></div>
+    <div class="card"><label for="intro" data-i18n="iL"></label><p class="hint" data-i18n="iH"></p><textarea id="intro"></textarea></div>
+    <div class="card"><label for="body" data-i18n="dL"></label><p class="hint" data-i18n="dH"></p><textarea id="body" style="min-height:220px"></textarea></div>
+    <div class="card"><label for="faq" data-i18n="fL"></label><p class="hint" data-i18n="fH"></p><textarea id="faq" style="min-height:110px"></textarea></div>
+    <div class="row">
+      <button type="button" class="btn" id="run" data-i18n="run"></button>
+      <button type="button" class="btn ghost" id="exBad" data-i18n="exBad"></button>
+      <button type="button" class="btn ghost" id="exGood" data-i18n="exGood"></button>
+      <button type="button" class="btn ghost" id="clear" data-i18n="clear"></button>
+    </div>
+  </section>
+  <section aria-label="Result" aria-live="polite">
+    <div id="empty" class="empty" data-i18n="empty"></div>
+    <div id="out" hidden>
+      <div class="scores">
+        <div class="score" id="sSeo"><div class="lab" data-i18n="forG"></div><div class="num"></div><div class="verdict"></div></div>
+        <div class="score" id="sAi"><div class="lab" data-i18n="forA"></div><div class="num"></div><div class="verdict"></div></div>
+      </div>
+      <div class="card" style="padding:12px 14px"><div class="ctitle" data-i18n="kw"></div><div class="cwhy" data-i18n="kwH"></div><div class="chips" id="chips"></div></div>
+      <h2 class="part" data-i18n="p1"></h2><ul class="checks" id="l1"></ul>
+      <h2 class="part" data-i18n="p2"></h2><ul class="checks" id="l2"></ul>
+      <h2 class="part" data-i18n="p3"></h2><ul class="checks" id="l3"></ul>
+      <h2 class="part" data-i18n="p4"></h2>
+      <div class="card"><div class="ctitle" data-i18n="aiT"></div><div class="cwhy" data-i18n="aiHint"></div><pre class="prop" id="aiPrompt"></pre>
+        <div class="row"><button type="button" class="btn ghost" data-copy="aiPrompt" data-i18n="copyPrompt"></button></div></div>
+      <div class="row"><button type="button" class="btn" id="copy" data-i18n="copy"></button><span id="copied" class="cwhy" hidden data-i18n="copied"></span></div>
+      <p class="note" data-i18n="note"></p>
+    </div>
+  </section>
+</main>
+<footer data-i18n="foot"></footer>
+<script>
+const T={
+en:{kicker:"Retail & Digital Marketing · Lesson 4",h1a:"Can Google and the AI",h1b:"find this page?",
+lead:"Paste the customer's question and your page — the top, the article, the FAQ. The check reads it with the Lesson 4 rules, for Google and for the AI.",
+qL:"1 · The customer's question",qH:"In their words, as they would type it or ask an AI. No brand name.",
+bL:"2 · Brand or product name",bH:"The name the AI should say when it quotes you.",
+tL:"3 · Page title",tH:"The main heading — what Google shows in blue.",
+iL:"4 · The summary at the top",iH:"The first 2–3 sentences under the title: what it is, for whom, the key facts.",
+dL:"5 · The article",dH:"The text of the page. Put each heading on its own line (you can start it with #). Lists: one item per line, starting with -. At the end: who wrote it and when.",
+fL:"6 · FAQ — for the AI (optional)",fH:"It doesn't change the Google score. Questions customers really ask. The question, then the answer on the same line or the next.",
+run:"Check my page",exBad:"Example: before",exGood:"Example: after",clear:"Clear",
+empty:"Your result will appear here. Try the two examples first: same shoes, two ways of writing.",
+forG:"For Google",forA:"For the AI",kw:"The customer's words",kwH:"Green: they appear in your title, summary or headings. Red: missing.",
+p1:"1 · The top of the page",p2:"2 · The article",p3:"3 · The FAQ",p4:"4 · Rewrite it with your AI",propT:"Your page, rewritten with the rules",propH:"Built from your own text. Words in [brackets] are facts only you know: replace them. Nothing is invented.",copyText:"Copy the text",aiT:"A ready prompt",aiHint:"A ready prompt with your text and the rules you missed. Paste it into ChatGPT, Claude or Gemini — then check the result here again.",copyPrompt:"Copy the prompt",
+copy:"Copy for my dossier",copied:"Copied.",
+note:"This is a checklist, not Google. It checks how the page is written, with the rules from the lesson. “For Google” mixes Google's own guidance (write for people, clear titles and headings, no keyword stuffing) with good-writing habits: Google has no word-count rule. It cannot tell you your ranking or whether an AI will choose you — for that, run the assistant test.",
+foot:"Retail & Digital Marketing · Argentina 2026 · Barbara Lorenzini · Nothing you type leaves this page.",chars:"characters",
+need:"Fill in at least the question, the title and the summary.",rules:"rules passed out of {n} · {w} to improve.",
+v3:"Well written. Now check it with real searches.",v2:"Good start — fix the orange and red points.",v1:"Hard to find. Start from the red points.",
+c:{
+words:["Uses the customer's words","{h} of {n} words of the question are in the title, summary or headings.","Write with the words people type, not the brand's words."],
+titleLen:["Title of a good length","{n} characters.","Google sets no limit, but long titles are cut to fit the screen. Important words first."],
+answer:["The answer comes first","The first sentence {s}.","Answer the question in the first sentence. Details come after."],
+summary:["A short summary at the top","{n} words, {k} sentences.","Open with 2–3 sentences, under about 60 words: what it is, for whom, the key facts. The AI often takes this part."],
+qHead:["The title is a question","{s}","Use the customer's question as the title."],
+standalone:["The first sentence stands on its own","{s}","Name the brand or product in the first sentence: an AI quotes single sentences."],
+heads:["Clear headings","{n} headings found.","Split the article with headings, one per question or topic, each on its own line."],
+hWords:["Headings in the customer's words","{n} headings use words from the question or are questions.","Write headings as questions customers ask, or with their words."],
+hAnswer:["Each heading is answered at once","{a} of {n} headings are followed by a short, direct first sentence.","Right under each heading, answer in one short sentence. Then explain."],
+para:["Short paragraphs","Longest paragraph: {n} words.","Keep paragraphs under about 80 words. One idea each."],
+depth:["Enough to answer","The article has {n} words.","Google has no preferred word count. Say enough to really answer: who it's for, how it works, how much, how to get it."],
+lists:["Facts in lists","{n} list items.","Put sizes, prices, steps and conditions in a list: easy to read for people and for the AI."],
+facts:["Facts in the text","Numbers or concrete details found: {n}.","Add facts people can check: sizes, prices, times, materials — in the text, not inside images."],
+natural:["The keyword, naturally","Most repeated: “{w}” × {n} ({p}% of the words){t}.","Read it aloud: if it doesn't sound like a person talking, cut the repetitions. Google judges keyword stuffing by how unnatural it reads, not by a count."],
+vague:["Few empty marketing words","Vague words found: {list}.","Replace them with facts. “Innovative” says nothing; “8 mm insole” says something."],
+short:["Short sentences","Average sentence length: {n} words.","Keep sentences under about 20 words."],
+who:["Who wrote it and when","{s}","At the end, write who wrote it and when it was updated. People trust a signed, dated page — and Google's guidance asks whether it's clear who wrote it."],
+faq:["An FAQ with real questions","{n} questions with an answer.","Add 3–5 questions customers really ask, each with a short, direct answer."]
+},
+s:{firstHas:"contains words from the question",firstNo:"does not contain words from the question",firstLong:"is long ({n} words)",
+qYes:"The title is a question.",qNo:"The title is not a question.",brandYes:"The first sentence names {b}.",brandNo:"The first sentence does not name {b}.",brandMissing:"Add the brand name above to check this.",
+whoBoth:"Author and date found.",whoOne:"Only one of the two found (author or date).",whoNone:"No author and no date.",tRep:" · the title repeats it",noKw:"No word of the question is repeated.",none:"none"},
+report:"FINDABLE CHECK — Lesson 4",rq:"Question",rt:"Title",rSeo:"Google",rAi:"AI",rFix:"To fix"},
+es:{kicker:"Retail & Digital Marketing · Clase 4",h1a:"¿Google y la IA",h1b:"encuentran esta página?",
+lead:"Pegá la pregunta del cliente y tu página — el comienzo, el artículo, las preguntas frecuentes. El control la lee con las reglas de la clase 4, para Google y para la IA.",
+qL:"1 · La pregunta del cliente",qH:"Con sus palabras, como la escribiría en Google o se la haría a una IA. Sin el nombre de la marca.",
+bL:"2 · Nombre de la marca o del producto",bH:"El nombre que la IA debería decir cuando te cita.",
+tL:"3 · Título de la página",tH:"El título principal — lo que Google muestra en azul.",
+iL:"4 · El resumen al comienzo",iH:"Las primeras 2–3 frases debajo del título: qué es, para quién, los datos clave.",
+dL:"5 · El artículo",dH:"El texto de la página. Cada subtítulo en su propia línea (podés empezarlo con #). Listas: un ítem por línea, empezando con -. Al final: quién lo escribió y cuándo.",
+fL:"6 · Preguntas frecuentes — para la IA (opcional)",fH:"No cambia el puntaje para Google. Preguntas que los clientes hacen de verdad. La pregunta y la respuesta en la misma línea o en la siguiente.",
+run:"Revisar mi página",exBad:"Ejemplo: antes",exGood:"Ejemplo: después",clear:"Borrar",
+empty:"Acá va a aparecer el resultado. Probá primero los dos ejemplos: las mismas zapatillas, dos maneras de escribir.",
+forG:"Para Google",forA:"Para la IA",kw:"Las palabras del cliente",kwH:"Verde: aparecen en tu título, resumen o subtítulos. Rojo: faltan.",
+p1:"1 · El comienzo de la página",p2:"2 · El artículo",p3:"3 · Las preguntas frecuentes",p4:"4 · Reescribila con tu IA",propT:"Tu página, reescrita con las reglas",propH:"Armada con tu propio texto. Lo que está entre [corchetes] son datos que solo vos sabés: reemplazalos. No se inventa nada.",copyText:"Copiar el texto",aiT:"Un prompt listo",aiHint:"Un prompt listo con tu texto y las reglas que faltan. Pegalo en ChatGPT, Claude o Gemini — y después volvé a revisar el resultado acá.",copyPrompt:"Copiar el prompt",
+copy:"Copiar para mi dossier",copied:"Copiado.",
+note:"Es una lista de control, no es Google. Revisa cómo está escrita la página, con las reglas de la clase. “Para Google” combina las indicaciones de Google (escribir para las personas, títulos y subtítulos claros, nada de relleno de palabras clave) con buenos hábitos de escritura: Google no tiene una regla de cantidad de palabras. No te dice tu posición ni si una IA te va a elegir — para eso, hacé el test del asistente.",
+foot:"Retail & Digital Marketing · Argentina 2026 · Barbara Lorenzini · Nada de lo que escribís sale de esta página.",chars:"caracteres",
+need:"Completá por lo menos la pregunta, el título y el resumen.",rules:"reglas cumplidas de {n} · {w} para mejorar.",
+v3:"Bien escrita. Ahora probala con búsquedas reales.",v2:"Buen comienzo — corregí los puntos naranjas y rojos.",v1:"Difícil de encontrar. Empezá por los puntos rojos.",
+c:{
+words:["Usa las palabras del cliente","{h} de {n} palabras de la pregunta están en el título, el resumen o los subtítulos.","Escribí con las palabras que la gente busca, no con las de la marca."],
+titleLen:["Título de buen largo","{n} caracteres.","Google no fija un límite, pero los títulos largos se cortan para entrar en la pantalla. Primero las palabras importantes."],
+answer:["La respuesta va primero","La primera frase {s}.","Respondé la pregunta en la primera frase. Los detalles, después."],
+summary:["Un resumen corto al comienzo","{n} palabras, {k} frases.","Empezá con 2–3 frases, menos de unas 60 palabras: qué es, para quién, los datos clave. La IA muchas veces toma esta parte."],
+qHead:["El título es una pregunta","{s}","Usá la pregunta del cliente como título."],
+standalone:["La primera frase se entiende sola","{s}","Nombrá la marca o el producto en la primera frase: una IA cita frases sueltas."],
+heads:["Subtítulos claros","{n} subtítulos encontrados.","Dividí el artículo con subtítulos, uno por pregunta o tema, cada uno en su línea."],
+hWords:["Subtítulos con las palabras del cliente","{n} subtítulos usan palabras de la pregunta o son preguntas.","Escribí los subtítulos como preguntas de los clientes, o con sus palabras."],
+hAnswer:["Cada subtítulo tiene respuesta inmediata","{a} de {n} subtítulos siguen con una primera frase corta y directa.","Justo debajo de cada subtítulo, respondé en una frase corta. Después explicá."],
+para:["Párrafos cortos","Párrafo más largo: {n} palabras.","Párrafos de menos de unas 80 palabras. Una idea por párrafo."],
+depth:["Lo suficiente para responder","El artículo tiene {n} palabras.","Google no tiene una cantidad de palabras preferida. Decí lo necesario para responder de verdad: para quién es, cómo funciona, cuánto cuesta, cómo conseguirlo."],
+lists:["Datos en listas","{n} ítems de lista.","Poné talles, precios, pasos y condiciones en una lista: fácil de leer para las personas y para la IA."],
+facts:["Datos en el texto","Números o detalles concretos encontrados: {n}.","Agregá datos verificables: talles, precios, plazos, materiales — en el texto, no dentro de imágenes."],
+natural:["La palabra clave, con naturalidad","La más repetida: “{w}” × {n} ({p}% de las palabras){t}.","Leelo en voz alta: si no suena a una persona hablando, sacá repeticiones. Google juzga el relleno de palabras clave por lo poco natural, no por una cuenta."],
+vague:["Pocas palabras de marketing vacías","Palabras vagas encontradas: {list}.","Cambialas por datos. “Innovador” no dice nada; “plantilla de 8 mm” sí."],
+short:["Frases cortas","Largo promedio de las frases: {n} palabras.","Frases de menos de unas 20 palabras."],
+who:["Quién lo escribió y cuándo","{s}","Al final, escribí quién lo escribió y cuándo se actualizó. La gente confía en una página firmada y con fecha — y las indicaciones de Google preguntan si queda claro quién la escribió."],
+faq:["Preguntas frecuentes reales","{n} preguntas con respuesta.","Agregá 3–5 preguntas que los clientes hacen de verdad, cada una con una respuesta corta y directa."]
+},
+s:{firstHas:"contiene palabras de la pregunta",firstNo:"no contiene palabras de la pregunta",firstLong:"es larga ({n} palabras)",
+qYes:"El título es una pregunta.",qNo:"El título no es una pregunta.",brandYes:"La primera frase nombra a {b}.",brandNo:"La primera frase no nombra a {b}.",brandMissing:"Agregá el nombre de la marca arriba para revisar esto.",
+whoBoth:"Autor y fecha encontrados.",whoOne:"Solo uno de los dos (autor o fecha).",whoNone:"Ni autor ni fecha.",tRep:" · el título la repite",noKw:"Ninguna palabra de la pregunta se repite.",none:"ninguna"},
+report:"FINDABLE CHECK — Clase 4",rq:"Pregunta",rt:"Título",rSeo:"Google",rAi:"IA",rFix:"Para corregir"}
+};
+const EX={
+bad:{q:"¿qué zapatillas son cómodas para estar parado 8 horas?",brand:"Urban Walk",title:"Urban Collection FW26 — a new way to move",
+intro:"At Urban we believe every step tells a story. Our new collection blends craftsmanship and innovation to accompany you wherever life takes you.",
+body:"Our philosophy\nWe are passionate about creating unique experiences for people who love the city, and every detail of our collection has been designed with care, attention and love, because we believe that excellence is not a goal but a journey, and our innovative solutions are the result of years of research, dedication and passion for quality that makes our brand truly unique in the market and in the hearts of our customers.\nDiscover more\nVisit our stores and live the Urban experience.",faq:""},
+good:{q:"¿qué zapatillas son cómodas para estar parado 8 horas?",brand:"Urban Walk",title:"¿Zapatillas cómodas para estar parado 8 horas?",
+intro:"Sí: las Urban Walk son zapatillas livianas para estar de pie todo el día. Pesan 210 g, tienen plantilla acolchada de 8 mm y la suela no se resbala.",
+body:"# ¿Para quién son?\nPara quien trabaja parado muchas horas: vendedores, mozos, enfermeros. También para caminar por la ciudad.\n# ¿Por qué no cansan los pies?\nPor la plantilla de 8 mm y el peso: 210 g cada una. La horma deja espacio a los dedos y la suela absorbe el impacto.\n# Talles y precio\n- Talles 35 a 46\n- Horma ancha disponible\n- 6 cuotas sin interés\n- Envío gratis en CABA en 48 h\n# ¿Cómo elijo el talle?\nMedí tu pie en centímetros y usá la tabla de talles. Si dudás entre dos, elegí el más grande.\nEscrito por el equipo Urban Walk · Actualizado: noviembre 2026",
+faq:"¿Sirven para correr? No, están pensadas para caminar.\n¿Dónde las pruebo? En Palermo, Gorriti 4800.\n¿Se pueden lavar? Sí, a mano y con agua fría."}
+};
+const STOP=new Set(("a an the and or of to in on for with without by at from is are be am do does i you me my we our your it this that these those what which who how when where why can could should would will there here not no yes as about into than then so if but very more most "+
+"el la los las un una unos unas y o u de del al a en con sin por para que qué cual cuál cuales quien quién como cómo cuando cuándo donde dónde es son ser estar estoy esta está están me mi mis te tu tus su sus se lo le les nos yo vos usted ustedes muy más mas menos pero si sí no ya hay tengo tiene puedo puede algo todo toda todos todas este esta estos estas ese esa eso").split(/\s+/));
+const VAGUE=["innovative","innovation","unique","passion","passionate","world-class","best-in-class","cutting-edge","leading","high quality","excellence","solutions","journey","story","believe","experience","experiences","revolutionary","amazing","perfect",
+"innovador","innovadora","innovación","único","única","pasión","apasionados","líder","líderes","excelencia","soluciones","calidad superior","alta calidad","experiencia única","historia","creemos","revolucionario","increíble","perfecto","perfecta"];
+let lang="en";const $=id=>document.getElementById(id);
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[¿?¡!.,;:()"“”'’«»\-–—\/#·|]/g," ");
+const words=s=>norm(s).split(/\s+/).filter(Boolean);
+const keyWords=q=>[...new Set(words(q).filter(w=>!STOP.has(w)&&(w.length>2||/\d/.test(w))))];
+const stem=w=>w.length>5?w.slice(0,5):w;
+const has=(t,w)=>words(t).some(x=>x===w||(w.length>3&&stem(x)===stem(w)));
+const sentences=s=>s.split(/(?<=[.!?])\s+|\n+/).map(x=>x.trim()).filter(Boolean);
+const fmt=(t,o)=>t.replace(/\{(\w+)\}/g,(_,k)=>o[k]);
+const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const isList=l=>/^\s*([-•*]|\d+[.)])\s+/.test(l);
+function parse(body){
+ const ls=body.split("\n").map(x=>x.trim()).filter(Boolean),out=[];
+ ls.forEach((l,i)=>{let type="p";
+  if(isList(l)) type="li";
+  else if(/^#/.test(l)) type="h";
+  else if(words(l).length<=10&&!/[.:;,]$/.test(l)&&ls[i+1]&&!/^(escrit[oa] por|written by|actualizad|updated)/i.test(l)) type="h";
+  out.push({type,text:l.replace(/^#+\s*/,"")});});
+ return out;}
+function setLang(l){lang=l;document.documentElement.lang=l;
+ document.querySelectorAll("[data-i18n]").forEach(el=>{const v=T[l][el.dataset.i18n];if(typeof v==="string")el.textContent=v;});
+ document.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{const t=$(b.dataset.copy).textContent;try{await navigator.clipboard.writeText(t)}catch(e){}const o=b.textContent;b.textContent="✓";setTimeout(()=>b.textContent=o,1200);});
+document.querySelectorAll(".langs button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===l));
+ try{localStorage.setItem("fc-lang",l)}catch(e){}
+ tCount();if(!$("out").hidden)run();}
+function tCount(){$("tCount").textContent=$("title").value.length+" "+T[lang].chars;}
+function run(){
+ const L=T[lang],q=$("q").value.trim(),brand=$("brand").value.trim(),title=$("title").value.trim(),intro=$("intro").value.trim(),body=$("body").value.trim(),faq=$("faq").value.trim();
+ if(!q||!title||!intro){alert(L.need);return false;}
+ const P=parse(body),H=P.filter(x=>x.type==="h"),PAR=P.filter(x=>x.type==="p"),LI=P.filter(x=>x.type==="li");
+ const all=[title,intro,body,faq].join(" "),kws=keyWords(q),visible=title+" "+intro+" "+H.map(h=>h.text).join(" "),hits=kws.filter(w=>has(visible,w));
+ const first=sentences(intro)[0]||"",firstW=words(first).length,firstHit=kws.some(w=>has(first,w));
+ const R={1:[],2:[],3:[]};
+ const add=(part,key,st,tags,o)=>{const c=L.c[key];R[part].push({st,tags,title:c[0],why:fmt(c[1],o||{}),tip:st==="pass"?"":c[2]});};
+ // 1 · top
+ const ratio=kws.length?hits.length/kws.length:0;
+ add(1,"words",ratio>=.6?"pass":ratio>=.3?"warn":"fail","g",{h:hits.length,n:kws.length});
+ const tl=title.length;add(1,"titleLen",tl>=20&&tl<=65?"pass":tl<=80?"warn":"fail","g",{n:tl});
+ let sT=firstHit?L.s.firstHas:L.s.firstNo;if(firstW>30)sT+=" · "+fmt(L.s.firstLong,{n:firstW});
+ add(1,"answer",firstHit&&firstW<=30?"pass":firstHit?"warn":"fail","ga",{s:sT});
+ const iw=words(intro).length,ik=sentences(intro).length;
+ add(1,"summary",iw<=60&&ik<=3&&firstHit?"pass":iw<=90?"warn":"fail","a",{n:iw,k:ik});
+ const qh=/\?\s*$/.test(title)||/^¿/.test(title);add(1,"qHead",qh?"pass":"warn","a",{s:qh?L.s.qYes:L.s.qNo});
+ let st,sx;if(!brand){st="warn";sx=L.s.brandMissing}else{const ok=norm(first).includes(norm(brand).trim());st=ok?"pass":"fail";sx=fmt(ok?L.s.brandYes:L.s.brandNo,{b:brand});}
+ add(1,"standalone",st,"a",{s:sx});
+ // 2 · article
+ add(2,"heads",H.length>=3?"pass":H.length>=1?"warn":"fail","ga",{n:H.length});
+ const hw=H.filter(h=>/\?\s*$/.test(h.text)||/^¿/.test(h.text)||kws.some(w=>has(h.text,w))).length;
+ add(2,"hWords",H.length&&hw>=Math.max(1,Math.ceil(H.length/2))?"pass":hw>=1?"warn":"fail","g",{n:hw});
+ let ans=0;P.forEach((x,i)=>{if(x.type!=="h")return;const nx=P[i+1];if(nx&&((nx.type==="p"&&words(sentences(nx.text)[0]||"").length<=25)||nx.type==="li"))ans++;});
+ add(2,"hAnswer",H.length&&ans/H.length>=.7?"pass":ans>=1?"warn":"fail","a",{a:ans,n:H.length});
+ const maxP=PAR.reduce((m,x)=>Math.max(m,words(x.text).length),0);
+ add(2,"para",maxP<=80?"pass":maxP<=120?"warn":"fail","g",{n:maxP});
+ const bw=words(body).length;add(2,"depth",bw>=100?"pass":bw>=50?"warn":"fail","g",{n:bw});
+ add(2,"lists",LI.length>=3?"pass":LI.length>=1?"warn":"fail","a",{n:LI.length});
+ const nums=(all.match(/\d+([.,]\d+)?/g)||[]).length;add(2,"facts",nums>=5?"pass":nums>=2?"warn":"fail","ga",{n:nums});
+ const low=" "+norm(all)+" ",vag=VAGUE.filter(v=>low.includes(" "+norm(v).trim()+" "));
+ const AW=words(all),cnt=w=>AW.filter(x=>x===w||(w.length>3&&stem(x)===stem(w))).length;let mw="",mc=0;kws.forEach(w=>{const c=cnt(w);if(c>mc){mc=c;mw=w}});
+ const dens=AW.length?mc/AW.length:0,tRep=kws.some(w=>words(title).filter(x=>x===w||(w.length>3&&stem(x)===stem(w))).length>=2);
+ const nst=(dens>.06&&mc>=6)?"fail":((dens>.035&&mc>=5)||tRep)?"warn":"pass";
+ if(mc===0){R[2].push({st:"pass",tags:"g",title:L.c.natural[0],why:L.s.noKw,tip:""})}else add(2,"natural",nst,"g",{w:mw,n:mc,p:Math.round(dens*1000)/10,t:tRep?L.s.tRep:""});
+ add(2,"vague",vag.length===0?"pass":vag.length<=2?"warn":"fail","g",{list:vag.length?vag.join(", "):L.s.none});
+ const ss=sentences(intro+"\n"+PAR.map(p=>p.text).join("\n")),avg=ss.length?Math.round(ss.reduce((a,x)=>a+words(x).length,0)/ss.length):0;
+ add(2,"short",avg<=20?"pass":avg<=28?"warn":"fail","a",{n:avg});
+ const author=/(escrit[oa] por|written by|\bby\b|\bpor\b|autor|author|equipo|team)/i.test(body),date=/(actualizad|updated|\b20\d\d\b|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|january|february|march|april|june|july|august|september|october|november|december)/i.test(body);
+ add(2,"who",author&&date?"pass":author||date?"warn":"fail","a",{s:author&&date?L.s.whoBoth:author||date?L.s.whoOne:L.s.whoNone});
+ // 3 · FAQ
+ const fl=faq.split("\n").map(x=>x.trim()).filter(Boolean);let fn=0;
+ fl.forEach((x,i)=>{const m=x.match(/^(.*?\?)\s*(.*)$/);if(!m)return;if(words(m[2]).length>=2||(fl[i+1]&&!/\?/.test(fl[i+1])))fn++;});
+ add(3,"faq",fn>=3?"pass":fn>=1?"warn":"fail","a",{n:fn});
+ // scores
+ const every=[...R[1],...R[2],...R[3]],pick=t=>every.filter(c=>c.tags.includes(t));
+ const score=(el,a)=>{const ok=a.filter(c=>c.st==="pass").length,wn=a.filter(c=>c.st==="warn").length,m=a.length,pc=(ok+wn/2)/m;
+  el.className="score "+(pc>=.8?"good":pc>=.5?"mid":"low");el.querySelector(".num").textContent=ok+" / "+m;
+  el.querySelector(".verdict").textContent=fmt(L.rules,{n:m,w:wn})+" "+(pc>=.8?L.v3:pc>=.5?L.v2:L.v1);return ok+"/"+m;};
+ const s1=score($("sSeo"),pick("g")),s2=score($("sAi"),pick("a"));
+ const tag=t=>(t.includes("g")?`<span class="tag g">${esc(L.forG)}</span>`:"")+(t.includes("a")?`<span class="tag a">${esc(L.forA)}</span>`:"");
+ const li=c=>`<li class="${c.st}"><span class="badge">${c.st==="pass"?"✓":c.st==="warn"?"!":"✕"}</span><div><div class="ctitle">${esc(c.title)}${tag(c.tags)}</div><div class="cwhy">${esc(c.why)}</div>${c.tip?`<div class="ctip">${esc(c.tip)}</div>`:""}</div></li>`;
+ [1,2,3].forEach(k=>$("l"+k).innerHTML=R[k].map(li).join(""));
+ $("chips").innerHTML=kws.map(w=>`<span class="chip ${hits.includes(w)?"hit":"miss"}">${esc(w)}</span>`).join("")||"—";
+ $("empty").hidden=true;$("out").hidden=false;
+ const fixes=every.filter(c=>c.st!=="pass").map(c=>"- "+c.title+": "+c.tip).join("\n");
+ $("copy").dataset.report=`${L.report}\n${L.rq}: ${q}\n${L.rt}: ${title}\n${L.rSeo}: ${s1} · ${L.rAi}: ${s2}\n${L.rFix}:\n${fixes||"—"}`;
+ $("aiPrompt").textContent=aiPrompt(L,q,brand,title,intro,body,faq,every.filter(c=>c.st!=="pass"));
+ return true;}
+
+const hasVague=z=>{const n=" "+norm(z)+" ";return VAGUE.some(v=>n.includes(" "+norm(v).trim()+" "));};
+function aiPrompt(L,q,brand,title,intro,body,faq,fails){
+ const es=lang==="es";
+ const head=es?`ROL: Sos editor de contenidos web, experto en SEO y en textos que las IA pueden citar.
+INPUT: la página de abajo y la pregunta del cliente: "${q}". Marca/producto: ${brand||"[marca]"}.
+PASOS: reescribí la página respetando estas reglas que hoy no cumple:`:`ROLE: You are a web content editor, expert in SEO and in writing that AI assistants can quote.
+INPUT: the page below and the customer's question: "${q}". Brand/product: ${brand||"[brand]"}.
+STEPS: rewrite the page following these rules it misses today:`;
+ const tail=es?`EXPECTATION: devolvé título, resumen inicial (2–3 frases, menos de 60 palabras, la marca en la primera frase), artículo con subtítulos en forma de pregunta y una respuesta corta debajo de cada uno, datos en listas, firma y fecha, y 3–5 preguntas frecuentes con respuesta.
+NARROWING: usá SOLO los datos que están en el texto. Si falta un dato, escribí [FALTA: …] en lugar de inventarlo. Mismo idioma de la página. Sin palabras de marketing vacías.`:`EXPECTATION: return a title, a summary at the top (2–3 sentences, under 60 words, brand in the first sentence), an article with question headings and a short answer under each, facts in lists, author and date, and 3–5 FAQ with answers.
+NARROWING: use ONLY facts that are in the text. If a fact is missing, write [MISSING: …] instead of inventing it. Keep the page's language. No empty marketing words.`;
+ const rules=fails.length?fails.map(c=>"- "+c.title+": "+c.tip).join("\n"):(es?"- (ya cumple todas: mejorá solo la claridad)":"- (it already passes all: improve clarity only)");
+ return `${head}\n${rules}\n${tail}\n\n--- ${es?"PÁGINA":"PAGE"} ---\n${title}\n\n${intro}\n\n${body}\n\nFAQ\n${faq}`;}
+
+const F=["q","brand","title","intro","body","faq"];
+function fill(e){F.forEach(k=>$(k).value=e[k]);tCount();run();}
+$("run").onclick=()=>{if(run()&&window.innerWidth<900)$("out").scrollIntoView({behavior:"smooth"});};
+$("exBad").onclick=()=>fill(EX.bad);$("exGood").onclick=()=>fill(EX.good);
+$("clear").onclick=()=>{F.forEach(k=>$(k).value="");tCount();$("out").hidden=true;$("empty").hidden=false;};
+$("title").addEventListener("input",tCount);
+$("copy").onclick=async()=>{const r=$("copy").dataset.report||"";try{await navigator.clipboard.writeText(r)}catch(e){const t=document.createElement("textarea");t.value=r;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove();}
+ $("copied").hidden=false;setTimeout(()=>$("copied").hidden=true,1800);};
+document.querySelectorAll(".langs button").forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+let saved="en";try{saved=localStorage.getItem("fc-lang")||"en"}catch(e){}
+if(location.hash==="#es")saved="es";if(location.hash==="#en")saved="en";
+setLang(saved);
+</script>
+</body>
+</html>
